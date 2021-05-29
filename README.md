@@ -4,5 +4,8 @@ A real-time browser-based body part detection app (via Posenet: pose estimation 
 # demo
 https://keshav9316.github.io/gesture-classifier/
 
-https://user-images.githubusercontent.com/45781643/117281588-6eed6d00-ae81-11eb-8b40-6677f807e6b0.mp4
+
+https://user-images.githubusercontent.com/45781643/120069802-6dd8e580-c0a5-11eb-8178-d1da905d20b1.mp4
+
+
 
