@@ -6,15 +6,15 @@ let skeleton;
 let brain;
 let poseLabel = "";
 
-function setup() {
-  let div = createCanvas(640, 480);
-  div.style('background-color', 'gray');
+function setup() {                   //implicit p5.js call.....run only once
+  let div = createCanvas(640, 480);  //create canvas
+  div.style('background-color', 'gray'); 
   div.center('horizontal');
-  div.position(width/2 , height/10);
-  video = createCapture(VIDEO);
+  div.position(width/2 , height/10);  // position of canvas
+  video = createCapture(VIDEO);       // establish video connection, VIDEO is implicit to p5
   video.hide();
 
-//    let poseOptions = {
+//    let poseOptions = {   // multi pose estimation arguments
 //  imageScaleFactor: 0.3,
 //  outputStride: 16,
 //  flipHorizontal: false,
@@ -26,29 +26,28 @@ function setup() {
 //  multiplier: 0.75,
 // }
 
-  poseNet = ml5.poseNet(video,modelLoaded);
-  poseNet.on('pose', gotPoses);
+  poseNet = ml5.poseNet(video,modelLoaded);  // preload poseNet model
+  poseNet.on('pose', gotPoses);              // if found a pose call gotPoses callback
 
- 
-
-  let options = {
+   let options = {       // config. architecture of neural network
     inputs: 34,
     outputs: 4,
     task: 'classification',
     debug: true
   }
-  brain = ml5.neuralNetwork(options);
-  const modelInfo = {
+  brain = ml5.neuralNetwork(options);   // create a neural network with specified config.
+  
+  const modelInfo = {   
     model: 'model2/model.json',
     metadata: 'model2/model_meta.json',
     weights: 'model2/model.weights.bin',
   };
-  brain.load(modelInfo, brainLoaded);
+  brain.load(modelInfo, brainLoaded);   // fit our model in NN
 }
 
-function brainLoaded() {
+function brainLoaded() {    // CALLBACK
   console.log('pose classification ready!');
-  classifyPose();
+  classifyPose();       // make classification call
 }
 
 function classifyPose() {
