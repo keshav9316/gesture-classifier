@@ -5,14 +5,14 @@ let skeleton;
 
 let brain;
 let poseLabel = "";
-
-function setup() {                   //implicit p5.js call.....run only once
-  let div = createCanvas(640, 480);  //create canvas
+// start --> single pose estimation
+function setup() {                    //implicit p5.js call.....run only once
+  let div = createCanvas(640, 480);   //create canvas
   div.style('background-color', 'gray'); 
   div.center('horizontal');
-  div.position(width/2 , height/10);  // position of canvas
-  video = createCapture(VIDEO);       // establish video connection, VIDEO is implicit to p5
-  video.hide();
+  div.position(width/2 , height/10);  // positioning of canvas
+  video = createCapture(VIDEO);       // establish a video connection to the canvas (VIDEO is implicitly provided by p5)
+  video.hide();                       // hide video because we don't want to display camera stream without any processing
 
 //    let poseOptions = {   // multi pose estimation arguments
 //  imageScaleFactor: 0.3,
@@ -26,10 +26,10 @@ function setup() {                   //implicit p5.js call.....run only once
 //  multiplier: 0.75,
 // }
 
-  poseNet = ml5.poseNet(video,modelLoaded);  // preload poseNet model
-  poseNet.on('pose', gotPoses);              // if found a pose call gotPoses callback
-
-   let options = {       // config. architecture of neural network
+  poseNet = ml5.poseNet(video,modelLoaded);  // preload poseNet model from ml5 API
+  poseNet.on('pose', gotPoses);              // if found a pose call gotPoses callback function
+//-> Defining a Neural Network
+   let options = {       // configure the architecture of neural network
     inputs: 34,
     outputs: 4,
     task: 'classification',
@@ -37,31 +37,32 @@ function setup() {                   //implicit p5.js call.....run only once
   }
   brain = ml5.neuralNetwork(options);   // create a neural network with specified config.
   
+//-> Initializing Neural Network with our trained model        // Teachable Machine
   const modelInfo = {   
     model: 'model2/model.json',
     metadata: 'model2/model_meta.json',
     weights: 'model2/model.weights.bin',
   };
-  brain.load(modelInfo, brainLoaded);   // fit our model in NN
+  brain.load(modelInfo, brainLoaded);   // on successful initialization of NN give a callback to brainLoaded which makes classification calls
 }
 
-function brainLoaded() {    // CALLBACK
+function brainLoaded() {    // Callback Function
   console.log('pose classification ready!');
   classifyPose();       // make classification call
 }
 
-function classifyPose() {
-  if (pose) {
-    let inputs = [];
-    for (let i = 0; i < pose.keypoints.length; i++) {
+function classifyPose() {  // classify pose
+  if (pose) {                                         // if got a pose object in console
+    let inputs = [];                                  
+    for (let i = 0; i < pose.keypoints.length; i++) { // traverse over all keypoints and push their coordinates in input array
       let x = pose.keypoints[i].position.x;
       let y = pose.keypoints[i].position.y;
       inputs.push(x);
       inputs.push(y);
     }
-    brain.classify(inputs, gotResult);
+    brain.classify(inputs, gotResult);              // pose estimation model detect our poses and the neural network classifies them
   } else {
-    setTimeout(classifyPose, 100);
+    setTimeout(classifyPose, 100);                  // if we didn't got a pose wait for .1s and then, again call classify pose
   }
 }
 var tag;
