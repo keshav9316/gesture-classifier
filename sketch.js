@@ -102,7 +102,7 @@ function modelLoaded() {
 }
 
 function draw() {  // implicit call by p5.js (runs an infinite loop for every frame)
-  push();
+  push();       //saves the current pose
   translate(video.width, 0);          // translating video axis
   scale(-1, 1);
   image(video, 0, 0, video.width, video.height);
@@ -140,7 +140,7 @@ function draw() {  // implicit call by p5.js (runs an infinite loop for every fr
         ellipse(x, y, 15, 15);
       }
   }
-  pop();
+  pop();      //resets the drawing so that old coordinates are resetted for new frame
 
   // fill(255,255,25);
   // noStroke();
