@@ -1,3 +1,5 @@
+// IDEA : Use pose estimation model to detect pose and the neural network classifies them.
+
 let video;
 let poseNet;
 let pose;
@@ -28,6 +30,14 @@ function setup() {                    //implicit p5.js call.....run only once
 
   poseNet = ml5.poseNet(video,modelLoaded);  // preload poseNet model from ml5 API
   poseNet.on('pose', gotPoses);              // if found a pose call gotPoses callback function
+  
+  function gotPoses(poses) {
+  if (poses.length > 0) {
+    pose = poses[0].pose;
+    skeleton = poses[0].skeleton;
+  }
+}
+  
 //-> Defining a Neural Network
    let options = {       // configure the architecture of neural network
     inputs: 34,
@@ -52,7 +62,7 @@ function brainLoaded() {    // Callback Function
 }
 
 function classifyPose() {  // classify pose
-  if (pose) {                                         // if got a pose object in console
+  if (pose) {                                         // if a pose is detected in console
     let inputs = [];                                  
     for (let i = 0; i < pose.keypoints.length; i++) { // traverse over all keypoints and push their coordinates in input array
       let x = pose.keypoints[i].position.x;
@@ -60,15 +70,16 @@ function classifyPose() {  // classify pose
       inputs.push(x);
       inputs.push(y);
     }
-    brain.classify(inputs, gotResult);              // pose estimation model detect our poses and the neural network classifies them
+    brain.classify(inputs, gotResult);    // Hey pose estimation model detected our poses and Now, the neural network will classify them
   } else {
-    setTimeout(classifyPose, 100);                  // if we didn't got a pose wait for .1s and then, again call classify pose
+    setTimeout(classifyPose, 100);        // if we didn't got a pose wait for .1s and then, again call pose detection
   }
 }
+
 var tag;
 function gotResult(error, results) {
   
-  if (results[0].confidence > 0.75) {
+  if (results[0].confidence > 0.75) {  // if confidence is > 0.75, save the result in global varibles
     tag = results[0].confidence;
     poseLabel = results[0].label.toUpperCase();
   }
@@ -77,12 +88,12 @@ function gotResult(error, results) {
 }
 
 
-function gotPoses(poses) {
-  if (poses.length > 0) {
-    pose = poses[0].pose;
-    skeleton = poses[0].skeleton;
-  }
-}
+// function gotPoses(poses) {
+//   if (poses.length > 0) {
+//     pose = poses[0].pose;
+//     skeleton = poses[0].skeleton;
+//   }
+// }
 
 
 function modelLoaded() {
@@ -90,9 +101,9 @@ function modelLoaded() {
   // poseNet.multiPose(video);
 }
 
-function draw() {
+function draw() {  // implicit call by p5.js (runs an infinite loop for every frame)
   push();
-  translate(video.width, 0);
+  translate(video.width, 0);          // translating video axis
   scale(-1, 1);
   image(video, 0, 0, video.width, video.height);
 
@@ -102,33 +113,32 @@ function draw() {
       stroke(255);
       var wheelx = (pose.rightEar.x + pose.leftEar.x)/2;
       var wheely = (pose.rightEar.y + pose.leftEar.y)/2;
-      ellipse(wheelx, wheely, pose.rightEar.x - pose.leftEar.x, 3*(pose.leftEye.x - pose.rightEye.x));
+      ellipse(wheelx, wheely, pose.rightEar.x - pose.leftEar.x, 3*(pose.leftEye.x - pose.rightEye.x));  // draw a circle around the face
       line(pose.rightEar.x, pose.rightEar.y, pose.leftEar.x, pose.leftEar.y);
     
-  fill(255,255,25);
-  noStroke();
-  textSize(100);
-  textAlign(CENTER, CENTER);
-  text(poseLabel, pose.nose.x , pose.nose.y + pose.rightEar.x - pose.leftEar.x);
-//  textSize(50);
-  // text(tag, pose.nose.x , pose.nose.y + pose.rightEar.x - pose.leftEar.x);
+      fill(255,255,25);
+      noStroke();
+      textSize(100);
+      textAlign(CENTER, CENTER);
+      text(poseLabel, pose.nose.x , pose.nose.y + pose.rightEar.x - pose.leftEar.x);
+      //  textSize(50);
+      // text(tag, pose.nose.x , pose.nose.y + pose.rightEar.x - pose.leftEar.x);
 
 
-      for (let i = 0; i < skeleton.length; i++) {
-      let a = skeleton[i][0];
-      let b = skeleton[i][1];
-      strokeWeight(2);
-      stroke(0);
-
-      line(a.position.x, a.position.y, b.position.x, b.position.y);
-    }
-    for (let i = 0; i < pose.keypoints.length; i++) {
-      let x = pose.keypoints[i].position.x;
-      let y = pose.keypoints[i].position.y;
-      fill(10);
-      stroke(255);
-      ellipse(x, y, 15, 15);
-    }
+      for (let i = 0; i < skeleton.length; i++) {   // display all lines between the coordinates in keypoints
+        let a = skeleton[i][0];
+        let b = skeleton[i][1];
+        strokeWeight(2);
+        stroke(0);
+        line(a.position.x, a.position.y, b.position.x, b.position.y);
+      }
+      for (let i = 0; i < pose.keypoints.length; i++) {  // display all coordinates in keypoints
+        let x = pose.keypoints[i].position.x;
+        let y = pose.keypoints[i].position.y;
+        fill(10);
+        stroke(255);
+        ellipse(x, y, 15, 15);
+      }
   }
   pop();
 
